@@ -1,0 +1,52 @@
+{% extends "network/base.html" %}
+{% block title %}Find a path — Threadwork{% endblock %}
+{% block content %}
+
+<span class="eyebrow">Shortest path</span>
+<h1>How are you connected?</h1>
+<p class="subtitle">Pick two people to trace the shortest chain of connections between them.</p>
+
+{% if not db_error %}
+  <form class="path-form" method="get" action="{% url 'network:path_finder' %}">
+    <div class="field">
+      <label for="from">From</label>
+      <select name="from" id="from">
+        <option value="">Select a person…</option>
+        {% for p in people %}
+          <option value="{{ p.id }}" {% if p.id == from_id %}selected{% endif %}>{{ p.name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="field">
+      <label for="to">To</label>
+      <select name="to" id="to">
+        <option value="">Select a person…</option>
+        {% for p in people %}
+          <option value="{{ p.id }}" {% if p.id == to_id %}selected{% endif %}>{{ p.name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <button type="submit">Trace path</button>
+  </form>
+
+  {% if searched %}
+    {% if path %}
+      <div class="card">
+        <h2>{{ path.hops }} hop{{ path.hops|pluralize }} apart</h2>
+        <div class="path-chain">
+          {% for node in path.people %}
+            <span class="path-node">{{ node.name }}</span>
+            {% if not forloop.last %}<span class="path-link"></span>{% endif %}
+          {% endfor %}
+        </div>
+      </div>
+    {% else %}
+      <div class="empty-state">
+        <div class="icon">◌</div>
+        <p>No path found within 6 hops — they may not be connected yet.</p>
+      </div>
+    {% endif %}
+  {% endif %}
+{% endif %}
+
+{% endblock %}

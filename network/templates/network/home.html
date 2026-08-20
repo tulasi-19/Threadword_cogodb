@@ -1,0 +1,62 @@
+{% extends "network/base.html" %}
+{% block title %}Threadwork — Directory{% endblock %}
+{% block content %}
+
+<span class="eyebrow">People · Companies · Skills</span>
+<h1>Your network, mapped.</h1>
+<p class="subtitle">
+  Every person below is a node in a graph, not a row in a table. Open a
+  profile to see their direct connections, who you might know through
+  them, and how closely your skills overlap.
+</p>
+
+<svg class="hero-graph" viewBox="0 0 720 140" fill="none" xmlns="http://www.w3.org/2000/svg" role="presentation" aria-hidden="true">
+  <g stroke="#2a3543" stroke-width="1.5">
+    <line x1="60" y1="70" x2="180" y2="30"/>
+    <line x1="60" y1="70" x2="180" y2="110"/>
+    <line x1="180" y1="30" x2="330" y2="60"/>
+    <line x1="180" y1="110" x2="330" y2="60"/>
+    <line x1="330" y1="60" x2="470" y2="20"/>
+    <line x1="330" y1="60" x2="470" y2="100"/>
+    <line x1="470" y1="20" x2="620" y2="55"/>
+    <line x1="470" y1="100" x2="620" y2="55"/>
+  </g>
+  <g stroke="#e8a33d" stroke-width="2">
+    <line x1="180" y1="30" x2="330" y2="60"/>
+    <line x1="330" y1="60" x2="470" y2="20"/>
+    <line x1="470" y1="20" x2="620" y2="55"/>
+  </g>
+  <g fill="#171f2a" stroke="#4fb0a5" stroke-width="1.5">
+    <circle cx="60" cy="70" r="9"/>
+    <circle cx="180" cy="110" r="9"/>
+    <circle cx="330" cy="60" r="9"/>
+    <circle cx="470" cy="100" r="9"/>
+    <circle cx="620" cy="55" r="9"/>
+  </g>
+  <g fill="#10151c" stroke="#e8a33d" stroke-width="2.5">
+    <circle cx="180" cy="30" r="10"/>
+    <circle cx="470" cy="20" r="10"/>
+  </g>
+</svg>
+
+{% if not db_error %}
+  {% if people %}
+    <h2>Directory ({{ people|length }})</h2>
+    <div class="person-grid">
+      {% for p in people %}
+        <div class="person-card">
+          <a href="{% url 'network:profile' p.id %}">{{ p.name }}</a>
+          <div class="city">{{ p.city }}</div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="empty-state">
+      <div class="icon">◌</div>
+      <p>No one's in the graph yet. Run the seed script to load sample data:</p>
+      <p class="mono">python manage.py shell -c "from network.seed_data import run; run()"</p>
+    </div>
+  {% endif %}
+{% endif %}
+
+{% endblock %}

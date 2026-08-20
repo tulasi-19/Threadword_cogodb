@@ -1,0 +1,32 @@
+{% extends "network/base.html" %}
+{% block title %}Search — Threadwork{% endblock %}
+{% block content %}
+
+<span class="eyebrow">Find someone</span>
+<h1>Search the directory</h1>
+<p class="subtitle">Search by name to jump straight to a person's connections.</p>
+
+<form class="search-form" method="get" action="{% url 'network:search' %}">
+  <input type="text" name="q" value="{{ term }}" placeholder="Search by name…" autofocus>
+  <button type="submit">Search</button>
+</form>
+
+{% if not db_error %}
+  {% if term and not results %}
+    <div class="empty-state">
+      <div class="icon">◌</div>
+      <p>No one named "{{ term }}" is in the graph.</p>
+    </div>
+  {% elif results %}
+    <div class="person-grid">
+      {% for p in results %}
+        <div class="person-card">
+          <a href="{% url 'network:profile' p.id %}">{{ p.name }}</a>
+          <div class="city">{{ p.city }}</div>
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+{% endif %}
+
+{% endblock %}

@@ -1,0 +1,32 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Threadwork{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'network/style.css' %}">
+</head>
+<body>
+  <header class="site-header">
+    <a href="{% url 'network:home' %}" class="wordmark">Threadwork</a>
+    <nav>
+      <a href="{% url 'network:home' %}">Directory</a>
+      <a href="{% url 'network:search' %}">Search</a>
+      <a href="{% url 'network:path_finder' %}">Find a path</a>
+    </nav>
+  </header>
+  <main>
+    {% if db_error %}
+      <div class="error-banner">
+        <strong>Can't reach the graph database</strong>
+        {{ db_error }}
+      </div>
+    {% endif %}
+    {% block content %}{% endblock %}
+  </main>
+  <footer>Threadwork — a graph-backed people network, built on CognoDB.</footer>
+</body>
+</html>

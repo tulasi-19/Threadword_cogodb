@@ -1,0 +1,126 @@
+{% extends "network/base.html" %}
+{% block title %}{{ person.name|default:"Profile" }} — Threadwork{% endblock %}
+{% block content %}
+
+{% if not db_error %}
+  {% if not person %}
+    <div class="empty-state">
+      <div class="icon">◌</div>
+      <p>No one matches that ID.</p>
+      <p><a href="{% url 'network:home' %}">Back to the directory</a></p>
+    </div>
+  {% else %}
+    <span class="eyebrow">Profile</span>
+    <h1>{{ person.name }}</h1>
+    <p class="subtitle">
+      {{ person.city }}{% if person.company %} · works at {{ person.company }}{% endif %}
+    </p>
+
+    {% if person.skills %}
+      <div style="margin-bottom: 32px;">
+        {% for s in person.skills %}<span class="tag">{{ s }}</span>{% endfor %}
+      </div>
+    {% endif %}
+
+    <div class="card">
+      <h2>Ask for a referral</h2>
+      <p class="subtitle" style="margin-bottom: 16px;">
+        Referrals can only be requested from a direct connection — pick who you are to check.
+      </p>
+      <form method="get" action="" class="path-form" style="margin-bottom: 0;">
+        <div class="field">
+          <label for="as">You are</label>
+          <select name="as" id="as" onchange="this.form.submit()">
+            <option value="">Select yourself…</option>
+            {% for p in all_people %}
+              <option value="{{ p.id }}" {% if p.id == viewing_as %}selected{% endif %}>{{ p.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </form>
+
+      {% if viewing_as %}
+        {% if not is_connected %}
+          <p class="mono" style="margin-top: 14px;">You're not directly connected to {{ person.name }}, so you can't request a referral from them.</p>
+        {% elif already_requested %}
+          <p class="mono" style="margin-top: 14px;">You already asked {{ person.name }} for a referral — status: {{ already_requested }}.</p>
+        {% else %}
+          <form method="post" action="" style="margin-top: 14px;">
+            {% csrf_token %}
+            <input type="hidden" name="as" value="{{ viewing_as }}">
+            <button type="submit">Ask {{ person.name }} for a referral</button>
+          </form>
+        {% endif %}
+
+        {% if sent_requests %}
+          <h2 style="margin-top: 28px;">Referrals you've asked for</h2>
+          {% for r in sent_requests %}
+            <div class="connection-row">
+              <a href="{% url 'network:profile' r.id %}?as={{ viewing_as }}">{{ r.name }}</a>
+              <span class="mono">{{ r.status }}</span>
+            </div>
+          {% endfor %}
+        {% endif %}
+
+        {% if received_requests %}
+          <h2 style="margin-top: 28px;">Referral requests you've received</h2>
+          {% for r in received_requests %}
+            <div class="connection-row">
+              <a href="{% url 'network:profile' r.id %}?as={{ viewing_as }}">{{ r.name }}</a>
+              <span class="mono">{{ r.status }}</span>
+            </div>
+          {% endfor %}
+        {% endif %}
+      {% endif %}
+    </div>
+
+    <div class="card">
+      <h2>Direct connections ({{ direct_connections|length }})</h2>
+      {% if direct_connections %}
+        {% for c in direct_connections %}
+          <div class="connection-row">
+            <a href="{% url 'network:profile' c.id %}">{{ c.name }}</a>
+            <span class="mono">{{ c.city }}</span>
+          </div>
+        {% endfor %}
+      {% else %}
+        <p class="mono">No direct connections yet.</p>
+      {% endif %}
+    </div>
+
+    <div class="card">
+      <h2>People you may know</h2>
+      <p class="subtitle" style="margin-bottom: 16px;">Friends-of-friends, ranked by how many mutual connections you share.</p>
+      {% if suggestions %}
+        {% for s in suggestions %}
+          <div class="suggestion-row">
+            <div>
+              <a href="{% url 'network:profile' s.id %}">{{ s.name }}</a>
+              <div class="mono">via {{ s.sample_mutuals|join:", " }}</div>
+            </div>
+            <span class="mutual-count">{{ s.mutual_count }} mutual</span>
+          </div>
+        {% endfor %}
+      {% else %}
+        <p class="mono">No suggestions — your friends don't share any other connections yet.</p>
+      {% endif %}
+    </div>
+
+    <div class="card">
+      <h2>Shared skills nearby</h2>
+      <p class="subtitle" style="margin-bottom: 16px;">People within a few hops in the network who share at least one skill with you.</p>
+      {% if skill_matches %}
+        {% for m in skill_matches %}
+          <div class="suggestion-row">
+            <a href="{% url 'network:profile' m.id %}">{{ m.name }}</a>
+            <span class="mono">{{ m.shared_skills|join:", " }}</span>
+          </div>
+        {% endfor %}
+      {% else %}
+        <p class="mono">No skill overlap found nearby.</p>
+      {% endif %}
+    </div>
+  {% endif %}
+{% endif %}
+
+{% endblock %}
