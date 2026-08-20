@@ -166,6 +166,6 @@ Since the app has no login system, profile pages include a "You are" dropdown so
 
 ## Demo
 
-* Hosted demo: *add your link here*
+* Hosted demo: *https://threadword-cogodb.onrender.com*
 * Screen recording: *add your link here*
 
